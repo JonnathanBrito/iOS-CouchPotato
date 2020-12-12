@@ -8,8 +8,24 @@
 import UIKit
 import SwiftKeychainWrapper
 
-class LogInViewController: UIViewController {
+//protocol CredentialsFromLoginDelegate: class {
+//    func passSessionID(session_id: String) -> String
+//    func passUserName(username_: String) -> String
+//}
 
+class LogInViewController: UIViewController {
+    
+    //MARK: - Delegate Functions (worked but page transition caused bugs)
+//    func passSessionID(session_id: String) -> String {
+//        return session_id
+//    }
+//
+//    func passUserName(username_: String) -> String {
+//        return username_
+//    }
+//
+//    var delegate:CredentialsFromLoginDelegate?
+    
     @IBOutlet weak var emailTextField: UITextField!
     
     @IBOutlet weak var passwordTextField: UITextField!
@@ -18,13 +34,12 @@ class LogInViewController: UIViewController {
     
     @IBOutlet weak var navBarLogIn: UINavigationBar!
     
+    //Attempt to send session data
+//    public var completionHandler: ((String) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupElements()
-//        displayError(ErrorMessage: "Test")
-        
-        // Do any additional setup after loading the view.
         
         // MARK: - Hide Keyboard
 //        let gestureRecognizer = UITapGestureRecognizer(target: self,
@@ -40,15 +55,6 @@ class LogInViewController: UIViewController {
         Utilities.styleFilledButton(loginButton)
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
     
 
     //MARK: - Back Button
@@ -69,26 +75,50 @@ class LogInViewController: UIViewController {
             let newPassword = passwordTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             getTokenRequest { (result) in
                 let newToken = result?.token!
-                print(newToken!)
+                print("Token: \(newToken!)")
                 self.startSession(passedUsername: newUsername, passedPassword: newPassword, passedToken: newToken!) { (result) in
                     let validated = result?.success
                     if validated == true {
                         self.fetchSesssionId(passedToken: newToken!) { (result) in
                             let newSession = result?.session_id!
-                            print(newSession!)
-                            self.switchToMovieHub()
+                            print("Session ID: \(newSession!)")
+                            let savedSession: Bool = KeychainWrapper.standard.set(newSession!, forKey: "SessionToken")
+                            let savedUsername: Bool = KeychainWrapper.standard.set(newUsername, forKey: "Username")
+                            
+                            
+                            //MARK: - 5 Hr bug
+                            // Attempted every possible way to transition pages but it would either cause the page to freeze without transitioning or just cause the page to be irresponsive. FIX -> KeyChainWrapper
+                                                        
+                            
+                            
+                            //                            let storyBoard: UIStoryboard = UIStoryboard(name: Constants.Storyboard.homeViewController, bundle: nil)
+                            //                            let newViewController = storyBoard.instantiateViewController(withIdentifier: Constants.Storyboard.homeViewController) as! DisplayRecViewController
+                            
+                            
+//                                    newViewController.modalPresentationStyle = .fullScreen
+//                                    self.present(newViewController, animated: true, completion: nil)
+//
+                    
+//                            self.present(vc, animated: true, completion: nil)
+                            
+                            
+//                            let vc = DisplayRecViewController()
+//                            vc.delegate = self
+//                            vc.moveSessionHere = newSession!
+                            
+                            if savedSession && savedUsername {
+                                self.switchToMovieHub()
+                            }
+                            else{
+                                self.displayError(ErrorMessage: "Could Not Save Session, Please Try Again.")
+                            }
                         }
                     } else {
                         self.displayError(ErrorMessage: "Could not validate your credentials, please try again.")
                     }
                 }
-                
-                
             }
-           
-            
         }
-      
     }
     
     //MARK: - Checks fields to make sure that none are empty and returns true if they pass
@@ -126,7 +156,7 @@ class LogInViewController: UIViewController {
     
     func getTokenRequest (completion: @escaping(TokenRequest?) -> Void) {
             guard let url = URL(string: "https://api.themoviedb.org/3/authentication/token/new?api_key=5360dbcdd83554f5e5a36e56a57d32c8") else {
-                fatalError("Invalid URL")
+                fatalError("function in string")
             }
 
                 let config = URLSessionConfiguration.default
@@ -150,10 +180,7 @@ class LogInViewController: UIViewController {
 
                         DispatchQueue.main.async {
                             completion(movieDetails)
-
                         }
-                      
-                    
                     } catch let err {
                         self.displayError(ErrorMessage: "Err \(err)")
                     }
@@ -199,15 +226,11 @@ class LogInViewController: UIViewController {
 
                 DispatchQueue.main.async {
                         completion(sessionDetails)
-
                 }
-            
             } catch let err {
                 self.displayError(ErrorMessage: "Err \(err)")
             }
-            
         }
-
         // execute the HTTP request
         task.resume()
     }
@@ -265,6 +288,7 @@ class LogInViewController: UIViewController {
         view.window?.rootViewController = MovieHubViewController
         view.window?.makeKeyAndVisible()
     }
+    
     
     
     

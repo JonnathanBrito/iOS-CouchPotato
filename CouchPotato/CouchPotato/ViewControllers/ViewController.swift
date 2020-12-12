@@ -23,7 +23,9 @@ class ViewController: UIViewController {
 //        getMovieDetails(movie: 150) { (result) in
 //            print("finished")
 //        }
-//        getMoviesTest()
+//        getFavMovies { (results) in
+//            print("worked")
+//        }
 //        print("finished")
         
 
@@ -37,7 +39,10 @@ class ViewController: UIViewController {
 // MARK: - Add Hide Keyboard Functionality
     
     
-    func getMovieDetails(movie: Int, completion: @escaping (Result?) -> ()) {
+    
+    
+    
+    func getMovieDetails(movie: Int, completion: @escaping (RESULT?) -> ()) {
 
             guard let url = URL(string: "https://api.themoviedb.org/3/movie/157336?api_key=5360dbcdd83554f5e5a36e56a57d32c8") else {
                 fatalError("Invalid URL")
@@ -62,7 +67,7 @@ class ViewController: UIViewController {
                     do {
 
                         let decoder = JSONDecoder()
-                        let movieDetails = try decoder.decode(Result.self, from: data)
+                        let movieDetails = try decoder.decode(RESULT.self, from: data)
 
                         DispatchQueue.main.async {
 
@@ -103,7 +108,7 @@ class ViewController: UIViewController {
                     do {
 
                         let decoder = JSONDecoder()
-                        let movieDetails = try decoder.decode(Result.self, from: data)
+                        let movieDetails = try decoder.decode(RESULT.self, from: data)
 
                         DispatchQueue.main.async {
                             print(movieDetails)
